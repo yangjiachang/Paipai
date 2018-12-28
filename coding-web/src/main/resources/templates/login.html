@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>派派管理系统 | 登录</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/toastr/toastr.min.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{/css/animate.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css"/>
+    <link href="../static/css/login.min.css" th:href="@{css/login.min.css}" rel="stylesheet"/>
+    <link href="../static/ajax/libs/iCheck/custom.css" th:href="@{/ajax/libs/iCheck/custom.css}" rel="stylesheet"/>
+    <link href="../static/ruoyi/css/ry-ui.css" th:href="@{/ruoyi/css/ry-ui.css?v=3.1.0}" rel="stylesheet"/>
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <link rel="shortcut icon" href="../static/favicon.ico" th:href="@{favicon.ico}"/>
+    <style type="text/css">label.error { position:inherit;  }</style>
+    <script>
+        if(window.top!==window.self){window.top.location=window.location};
+    </script>
+</head>
+
+<body class="gray-bg">
+
+<div class="middle-box text-center loginscreen animated fadeInDown">
+    <div id="formLogin">
+        <div>
+            <h1 class="logo-name">PAIPAI</h1>
+        </div>
+        <h3>欢迎登录派派后台</h3>
+        <p>
+        </p>
+        <p>以人为镜可以明得失，以代码为镜可以通逻辑</p>
+        <form class="m-t" role="form"  action="#" method="post" onsubmit="return false" id="signupForm">
+            <div class="form-group">
+                <input type="text" name="username" class="form-control" placeholder="用户名" />
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" class="form-control" placeholder="密码" />
+            </div>
+            <div class="form-group" th:if="${captchaEnabled==true}">
+                <div class="col-xs-6" style="padding: 0 0 15px 0;">
+                    <input type="text" name="validateCode" class="form-control code" placeholder="验证码" maxlength="5">
+                </div>
+                <div class="col-xs-6" style="padding: 0;">
+                    <a href="javascript:void(0);" title="点击更换验证码" style="float: right;">
+                        <img th:src="@{captcha/captchaImage(type=${captchaType})}" style="float: right;" class="imgcode" width="85%" height="34px"/>
+                    </a>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block" id="btnSubmit" data-loading="正在验证登录，请稍后...">登录</button>
+        </form>
+        <p class="m-t"> <small>Copyright</strong> 派派 &copy; 2018</small> </p>
+    </div>
+</div>
+<script th:inline="javascript"> var ctx = [[@{/}]]; var captchaType = [[${captchaType}]]; </script>
+<!-- Mainly scripts -->
+<script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/bootstrap.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/plugins/toastr/toastr.min.js}" type="text/javascript"></script>
+<!-- 验证插件 -->
+<script src="../static/ajax/libs/validate/jquery.validate.min.js" th:src="@{/ajax/libs/validate/jquery.validate.min.js}"></script>
+<script src="../static/ajax/libs/validate/messages_zh.min.js" th:src="@{/ajax/libs/validate/messages_zh.min.js}"></script>
+<script src="../static/ajax/libs/layer/layer.min.js" th:src="@{/ajax/libs/layer/layer.min.js}"></script>
+<script src="../static/ajax/libs/iCheck/icheck.min.js" th:src="@{/ajax/libs/iCheck/icheck.min.js}"></script>
+<script src="../static/ajax/libs/blockUI/jquery.blockUI.js" th:src="@{/ajax/libs/blockUI/jquery.blockUI.js}"></script>
+<script src="http://tajs.qq.com/stats?sId=62048022"></script>
+<script src="../static/ruoyi/js/ry-ui.js" th:src="@{/ruoyi/js/ry-ui.js?v=3.1.0}"></script>
+<script src="../static/ruoyi/login.js" th:src="@{/ruoyi/login.js}"></script>
+</body>
+
+</html>

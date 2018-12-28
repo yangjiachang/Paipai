@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coding.system.mapper.CategoryMapper">
+    
+    <resultMap type="Category" id="CategoryResult">
+        <result property="categoryId"    column="category_id"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="categoryName"    column="category_name"    />
+        <result property="orderNum"    column="order_num"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="parentName" column="parent_name" />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+	
+	<sql id="selectCategoryVo">
+        select category_id, parent_id, ancestors, category_name, order_num, del_flag, create_by, create_time, update_by, update_time from sys_category
+    </sql>
+
+    <select id="selectCategoryList" parameterType="Category" resultMap="CategoryResult">
+        <include refid="selectCategoryVo"/>
+        where del_flag = '0'
+        <if test="parentId != null and parentId != 0">
+            AND parent_id = #{parentId}
+        </if>
+        <if test="categoryName != null and categoryName != ''">
+            AND category_name like concat('%', #{categoryName}, '%')
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        order by order_num
+    </select>
+    
+    <select id="selectCategoryById" parameterType="Integer" resultMap="CategoryResult">
+        select c.category_id, c.parent_id, c.ancestors, c.category_name, c.order_num, c.del_flag, c.create_by, c.create_time, c.update_by, c.update_time,
+        (select category_name from sys_category where category_id = c.parent_id) parent_name
+        from sys_category c
+        where c.category_id = #{categoryId}
+    </select>
+        
+    <insert id="insertCategory" parameterType="Category">
+        insert into sys_category
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="categoryId != null  ">category_id,</if>
+			<if test="parentId != null  ">parent_id,</if>
+			<if test="ancestors != null  and ancestors != ''  ">ancestors,</if>
+			<if test="categoryName != null  and categoryName != ''  ">category_name,</if>
+			<if test="orderNum != null  ">order_num,</if>
+			<if test="delFlag != null  and delFlag != ''  ">del_flag,</if>
+			<if test="createBy != null  and createBy != ''  ">create_by,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="categoryId != null  ">#{categoryId},</if>
+			<if test="parentId != null  ">#{parentId},</if>
+			<if test="ancestors != null  and ancestors != ''  ">#{ancestors},</if>
+			<if test="categoryName != null  and categoryName != ''  ">#{categoryName},</if>
+			<if test="orderNum != null  ">#{orderNum},</if>
+			<if test="delFlag != null  and delFlag != ''  ">#{delFlag},</if>
+			<if test="createBy != null  and createBy != ''  ">#{createBy},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateCategory" parameterType="Category">
+        update sys_category
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null  ">parent_id = #{parentId},</if>
+            <if test="ancestors != null  and ancestors != ''  ">ancestors = #{ancestors},</if>
+            <if test="categoryName != null  and categoryName != ''  ">category_name = #{categoryName},</if>
+            <if test="orderNum != null  ">order_num = #{orderNum},</if>
+            <if test="delFlag != null  and delFlag != ''  ">del_flag = #{delFlag},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where category_id = #{categoryId}
+    </update>
+
+    <update id="updateCategoryChildren" parameterType="java.util.List">
+        update sys_category set ancestors =
+        <foreach collection="categorys" item="item" index="index"
+                 separator=" " open="case category_id" close="end">
+            when #{item.categoryId} then #{item.ancestors}
+        </foreach>
+        where category_id in
+        <foreach collection="categorys" item="item" index="index"
+                 separator="," open="(" close=")">
+            #{item.categoryId}
+        </foreach>
+    </update>
+
+	<delete id="deleteCategoryById" parameterType="Integer">
+        delete from sys_category where category_id = #{categoryId}
+    </delete>
+	
+    <delete id="deleteCategoryByIds" parameterType="String">
+        delete from sys_category where category_id in 
+        <foreach item="categoryId" collection="array" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+    </delete>
+    
+</mapper>

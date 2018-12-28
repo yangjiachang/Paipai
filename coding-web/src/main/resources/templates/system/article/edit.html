@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<meta charset="utf-8">
+<link th:href="@{/css/editormd.css}" rel="stylesheet"/>
+<head th:include="include :: header"></head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-article-edit" th:object="${article}">
+            <input id="id" name="id" th:field="*{id}"  type="hidden">
+            <input id="treeId"name="categoryId" th:field="*{categoryId}"  type="hidden" />
+			<div class="form-group">
+				<label class="col-sm-3 control-label">文章标题：</label>
+				<div class="col-sm-8">
+					<input id="title" name="title" th:field="*{title}" class="form-control" type="text">
+				</div>
+			</div>
+			<div class="form-group">
+                <label class="col-sm-3 control-label">分类名称：</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" name="categoryName" onclick="selectCategoryTree()" readonly="true" id="treeName" th:field="*{category.categoryName}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">文章内容：</label>
+                <div class="col-sm-8">
+                    <div id="articleEditormd">
+                        <textarea style="display:none;" th:field="*{content}"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-control-static col-sm-offset-9">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                    <button onclick="$.modal.close()" class="btn btn-danger" type="button">关闭</button>
+                </div>
+            </div>
+		</form>
+    </div>
+<div th:include="include::footer"></div>
+<script th:src="@{/js/editormd.js}"></script>
+<script th:src="@{/ajax/libs/select/select2.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+    var contentMD = [[${article.content}]];
+    console.log(contentMD);
+    var articleEditormd;
+    $(function() {
+        articleEditormd = editormd("articleEditormd", {
+            width: "100%",
+            height: 740,
+            path : ctx + 'editormd/',
+            syncScrolling : "single",
+            codeFold : true,
+            saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+            searchReplace : true,
+            htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+            emoji : true,
+            taskList : true,
+            tocm            : true,         // Using [TOCM]
+            tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart : true,             // 开启流程图支持，默认关闭
+            sequenceDiagram : true       // 开启时序/序列图支持，默认关闭,
+        });
+    });
+
+    var prefix = ctx + "system/article"
+    $("#form-article-edit").validate({
+        rules:{
+            xxxx:{
+                required:true,
+            },
+        },
+        submitHandler: function(form) {
+            $.operate.save(prefix + "/edit", $('#form-article-edit').serialize());
+        }
+    });
+
+    /*文章管理-修改-选择分类树*/
+    function selectCategoryTree() {
+        var categoryId = $("#treeId").val();
+        var url = ctx + "system/category/selectCategoryTree/" + categoryId;
+        var options = {
+            title: '选择分类',
+            width: "380",
+            url: url,
+            callBack: doSubmit
+        };
+        $.modal.openOptions(options);
+    }
+
+
+    function doSubmit(index, layero){
+        var tree = layero.find("iframe")[0].contentWindow.$._tree;
+        if ($.tree.notAllowParents(tree)) {
+            var body = layer.getChildFrame('body', index);
+            $("#treeId").val(body.find('#treeId').val());
+            $("#treeName").val(body.find('#treeName').val());
+            layer.close(index);
+        }
+    }
+</script>
+</body>
+</html>

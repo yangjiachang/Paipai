@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coding.system.mapper.ArticleMapper">
+    
+    <resultMap type="Article" id="ArticleResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="htmlContent"    column="html_content"    />
+        <result property="tags"    column="tags"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="voteSize"    column="vote_size"    />
+        <result property="commentSize"    column="comment_size"    />
+        <result property="readSize"    column="read_size"    />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <association property="category"    column="category_id" javaType="Category" resultMap="categoryResult" />
+    </resultMap>
+
+    <resultMap id="categoryResult" type="Category">
+        <id     property="categoryId"   column="category_id"     />
+        <result property="parentId" column="parent_id"   />
+        <result property="categoryName" column="category_name"   />
+        <result property="orderNum" column="order_num"   />
+    </resultMap>
+	
+	<sql id="selectArticleVo">
+        select a.id, a.title, a.content, a.html_content, a.tags, a.category_id, a.vote_size, a.comment_size, a.read_size, a.create_by, a.create_time, c.category_name from sys_article a
+        left join sys_category c on a.category_id = c.category_id
+    </sql>
+	
+    <select id="selectArticleList" parameterType="Article" resultMap="ArticleResult">
+        select a.id, a.title, a.content, a.html_content, a.tags, a.category_id, a.vote_size, a.comment_size, a.read_size, a.create_by, a.create_time, a.update_by, a.update_time, c.category_name from sys_article a
+        left join sys_category c on a.category_id = c.category_id
+        where a.del_flag = '0'
+        <if test="categoryId != null and categoryId != 0">
+            AND (a.category_id = #{categoryId} OR a.category_id IN ( SELECT c.category_id FROM sys_category c WHERE FIND_IN_SET (#{categoryId},ancestors) ))
+        </if>
+    </select>
+    
+    <select id="selectArticleById" parameterType="Long" resultMap="ArticleResult">
+        <include refid="selectArticleVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertArticle" parameterType="Article" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_article
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null  ">id,</if>
+			<if test="title != null  and title != ''  ">title,</if>
+			<if test="content != null  and content != ''  ">content,</if>
+			<if test="htmlContent != null  and htmlContent != ''  ">html_content,</if>
+			<if test="tags != null  and tags != ''  ">tags,</if>
+			<if test="categoryId != null  ">category_id,</if>
+			<if test="voteSize != null  ">vote_size,</if>
+			<if test="commentSize != null  ">comment_size,</if>
+			<if test="readSize != null  ">read_size,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null  ">#{id},</if>
+			<if test="title != null  and title != ''  ">#{title},</if>
+			<if test="content != null  and content != ''  ">#{content},</if>
+			<if test="htmlContent != null  and htmlContent != ''  ">#{htmlContent},</if>
+			<if test="tags != null  and tags != ''  ">#{tags},</if>
+			<if test="categoryId != null  ">#{categoryId},</if>
+			<if test="voteSize != null  ">#{voteSize},</if>
+			<if test="commentSize != null  ">#{commentSize},</if>
+			<if test="readSize != null  ">#{readSize},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateArticle" parameterType="Article">
+        update sys_article
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null  and title != ''  ">title = #{title},</if>
+            <if test="content != null  and content != ''  ">content = #{content},</if>
+            <if test="htmlContent != null  and htmlContent != ''  ">html_content = #{htmlContent},</if>
+            <if test="tags != null  and tags != ''  ">tags = #{tags},</if>
+            <if test="categoryId != null  ">category_id = #{categoryId},</if>
+            <if test="voteSize != null  ">vote_size = #{voteSize},</if>
+            <if test="commentSize != null  ">comment_size = #{commentSize},</if>
+            <if test="readSize != null  ">read_size = #{readSize},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+	<delete id="deleteArticleById" parameterType="Long">
+        delete from sys_article where id = #{id}
+    </delete>
+	
+    <delete id="deleteArticleByIds" parameterType="String">
+        delete from sys_article where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
